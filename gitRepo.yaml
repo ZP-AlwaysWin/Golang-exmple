@@ -1,0 +1,42 @@
+gitRepo volume 简介
+gitRepo volume会挂载到一个空目录中，并clone一份指定的git代码到该目录中。
+gitRepo volume的生命周期与pod同步。
+clone操作会先于pod创建操作。也就是说pod创建后，代码已在挂载的目录中。
+
+
+---
+#gitRepo的例子
+apiVersion: v1
+kind: Service
+metadata:
+  name: foo
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 38080
+  selector:
+    name: foo
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: foo
+  labels:
+    name: foo
+spec:
+  containers:
+  - image: golang
+    name: foo
+    command: ["go", "run", "goweb.go"]
+    workingDir: "/home/foo/Golang-exmple"
+    volumeMounts:
+    - mountPath: /home/foo
+      name: git-volume
+  volumes:
+  - name: git-volume
+    gitRepo:
+      repository: "https://github.com/ZP-AlwaysWin/Golang-exmple.git"
+      revision: "master"
